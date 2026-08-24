@@ -1,0 +1,42 @@
+artifact_path: file:c:/Users/cleme/Documents/trueml_challenge/TrueML_Challenge/src/mlruns/1/models/m-1df881f9ba0748c19c6f66b738b32054/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.14.3
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.9.0
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.15.1
+model_id: m-1df881f9ba0748c19c6f66b738b32054
+model_size_bytes: 61469
+model_uuid: m-1df881f9ba0748c19c6f66b738b32054
+prompts: null
+run_id: 659d790c48bf4e1bae3c99eab041b6a4
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "previous_payment_amount", "required": true},
+    {"type": "double", "name": "product", "required": true}, {"type": "double", "name":
+    "last_reminder_sent_days", "required": true}, {"type": "double", "name": "debt_to_income_ratio",
+    "required": true}, {"type": "double", "name": "opened_last_communication", "required":
+    true}, {"type": "double", "name": "count_comms_sent_last_30d", "required": true},
+    {"type": "double", "name": "ever_missed_payment", "required": true}, {"type":
+    "double", "name": "age_of_debt_yrs", "required": true}, {"type": "double", "name":
+    "total_balance", "required": true}, {"type": "double", "name": "latest_communication_dow",
+    "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-08-23 00:43:33.938865'
