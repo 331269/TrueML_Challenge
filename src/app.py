@@ -12,10 +12,10 @@ import os
 
 BASE = Path(__file__).parent
 
-DB_PATH = r"C:/Users/cleme/Documents/trueml_challenge/TrueML_Challenge/src/databases/trueml_database.db"
+DB_PATH = str(BASE / "databases" / "trueml_database.db")
 TABLE_NAME = "database_challenge"
 
-OUTPUT_DB = str(r"C:/Users/cleme/Documents/trueml_challenge/TrueML_Challenge/src/databases/trueml_predictions.db")
+OUTPUT_DB = str(BASE / "databases" / "trueml_predictions.db")
 OUTPUT_TABLE = "predictions"
 
 TRACKING_URI = os.getenv(
