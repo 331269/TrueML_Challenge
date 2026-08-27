@@ -6,3 +6,4 @@ mlflow==3.15.1
 feature_engine==1.9.4
 joblib==1.5.3
 pillow==12.3.0
+category_encoders==2.10.0
