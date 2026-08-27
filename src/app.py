@@ -73,14 +73,15 @@ def load_data():
 @st.cache_resource
 def load_model():
     mlflow.set_tracking_uri(TRACKING_URI)
-    model = mlflow.sklearn.load_model(f"models:/{MODEL_NAME}@{ALIAS}")
-
     client = MlflowClient()
     mv = client.get_model_version_by_alias(MODEL_NAME, ALIAS)
-    thr = float(mv.tags["decision_threshold"])
 
-    return model, thr, mv.version
+    # Localiza el modelo dentro de los artifacts del repo, sin depender
+    # de las rutas absolutas que guardó el registro en Windows
+    model_dir = next((BASE.parent / "mlartifacts").rglob("MLmodel")).parent
+    model = mlflow.sklearn.load_model(str(model_dir))
 
+    return model, float(mv.tags["decision_threshold"]), mv.version
 
 def save_predictions(df_out):
     """Escribe la tabla de predicciones en la base de salida."""
