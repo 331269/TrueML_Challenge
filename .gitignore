@@ -34,5 +34,4 @@ models/
 outputs/
 *.log
 venv/
-mlruns/
 __pycache__/
