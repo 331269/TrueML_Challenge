@@ -182,34 +182,3 @@ with col_b:
                 "Writing to the database is only available when running locally. "
                 "Use the CSV download instead."
             )
-
-
-############## SINGLE PREDICTION
-
-st.subheader("Single prediction")
-
-account_id = st.selectbox(
-    "Select account_id",
-    df_raw["account_id"].tolist(),
-    help="Account to score with the champion model.",
-)
-
-pos = int(np.flatnonzero(df_raw["account_id"].values == account_id)[0])
-
-st.write("Selected record:")
-st.dataframe(df_raw[display_cols].iloc[[pos]], hide_index=True)
-
-if st.button("Predict"):
-    probability = float(proba[pos])
-    prediction = int(probability >= threshold)
-
-    st.subheader("Prediction")
-
-    col1, col2 = st.columns(2)
-    col1.metric("Probability", f"{probability:.2%}")
-    col2.metric("Threshold", f"{threshold:.2%}")
-
-    if prediction == 1:
-        st.success(f"Account {account_id}: POSITIVE (pays on time)")
-    else:
-        st.error(f"Account {account_id}: NEGATIVE (at risk)")
