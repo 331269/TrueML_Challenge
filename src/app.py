@@ -6,6 +6,7 @@ import streamlit as st
 import mlflow
 from mlflow import MlflowClient
 import joblib
+import os
 
 ############## CONFIGURACIÓN
 
@@ -17,7 +18,10 @@ TABLE_NAME = "database_challenge"
 OUTPUT_DB = str(r"C:/Users/cleme/Documents/trueml_challenge/TrueML_Challenge/src/databases/trueml_predictions.db")
 OUTPUT_TABLE = "predictions"
 
-TRACKING_URI = "sqlite:///C:/Users/cleme/Documents/trueml_challenge/TrueML_Challenge/mlflow.db"
+TRACKING_URI = os.getenv(
+    "MLFLOW_TRACKING_URI",
+    f"sqlite:///{(BASE.parent / 'mlflow.db').as_posix()}"
+)
 MODEL_NAME = "trueml_collections_logr"
 ALIAS = "champion_log"
 WOE_PATH = str(BASE / "woe_encoder.pkl")
