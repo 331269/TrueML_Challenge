@@ -1,11 +1,6 @@
-def combination(lista):
-    if not lista:
-        return [[]]
-
-    restantes = combination(lista[1:])
-    resultados = [element + [lista[0]] for element in restantes]
-
-    return restantes + resultados
+from unit_test.combination_function import combination
+import itertools
+import pytest
 
 def test_empty_set():
     assert combination([]) == [[]]
