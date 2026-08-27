@@ -1,0 +1,39 @@
+# ── Datos ──────────────────────────────────
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.parquet
+*.sqlite3
+data/*
+!data/.gitkeep
+
+# ── Credenciales ───────────────────────────
+.env
+*.key
+*.pem
+credentials.json
+
+# ── Python ─────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ── Sistema y editor ───────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Salidas ────────────────────────────────
+models/
+outputs/
+*.log
+venv/
+mlruns/
+*.pkl
+__pycache__/
