@@ -1,14 +1,16 @@
-from pathlib import Path
-import sqlite3
-import pandas as pd
-import numpy as np
-import streamlit as st
-import mlflow
-from mlflow import MlflowClient
-import joblib
 import os
+import sqlite3
+from pathlib import Path
 
-############## CONFIGURACIÓN
+import joblib
+import mlflow
+import numpy as np
+import pandas as pd
+import streamlit as st
+from mlflow import MlflowClient
+
+
+############## CONFIGURATION
 
 BASE = Path(__file__).parent
 
@@ -24,10 +26,11 @@ TRACKING_URI = os.getenv(
 )
 MODEL_NAME = "trueml_collections_logr"
 ALIAS = "champion_log"
+
 WOE_PATH = str(BASE / "woe_encoder.pkl")
 IMAGE_PATH = str(BASE / "trueml_logo.webp")
 
-# Las 14 columnas que vio el WOEEncoder al entrenarse
+# Columns the WOE encoder was fitted on
 ENCODER_COLS = [
     'latest_communication_channel', 'minimum_payment', 'previous_payment_amount',
     'product', 'last_reminder_sent_days', 'debt_to_income_ratio',
@@ -36,7 +39,7 @@ ENCODER_COLS = [
     'latest_communication_dow',
 ]
 
-# Las 10 que usa el modelo
+# Features selected by RFE, in training order
 variables = [
     'previous_payment_amount', 'product', 'last_reminder_sent_days',
     'debt_to_income_ratio', 'opened_last_communication',
@@ -49,7 +52,7 @@ display_cols = ["account_id"] + variables
 st.set_page_config(page_title="TrueML Collections", layout="wide")
 
 
-################ CARGA
+############## LOADERS
 
 def load_encoder():
     return joblib.load(WOE_PATH)
@@ -58,12 +61,12 @@ def load_encoder():
 @st.cache_data
 def load_data():
     conn = sqlite3.connect(DB_PATH)
-    tablas = pd.read_sql("SELECT name FROM sqlite_master WHERE type='table'", conn)
-    if TABLE_NAME not in tablas["name"].values:
+    tables = pd.read_sql("SELECT name FROM sqlite_master WHERE type='table'", conn)
+    if TABLE_NAME not in tables["name"].values:
         conn.close()
         raise ValueError(
-            f"La tabla '{TABLE_NAME}' no existe en {DB_PATH}. "
-            f"Tablas: {list(tablas['name'])}"
+            f"Table '{TABLE_NAME}' not found in {DB_PATH}. "
+            f"Available tables: {list(tables['name'])}"
         )
     df = pd.read_sql(f"SELECT * FROM {TABLE_NAME}", conn)
     conn.close()
@@ -76,34 +79,36 @@ def load_model():
     client = MlflowClient()
     mv = client.get_model_version_by_alias(MODEL_NAME, ALIAS)
 
-    model_id = mv.source.rsplit("/", 1)[-1]          # m-564f2616...
+    # Resolve the artifact folder locally: the registry stores absolute
+    # Windows paths that do not exist on the deployment host
+    model_id = mv.source.rsplit("/", 1)[-1]
     matches = [p.parent for p in BASE.parent.rglob("MLmodel") if model_id in str(p)]
     if not matches:
         raise FileNotFoundError(
-            f"No se encontraron artifacts para {model_id} bajo {BASE.parent}."
+            f"No artifacts found for {model_id} under {BASE.parent}."
         )
 
     model = mlflow.sklearn.load_model(str(matches[0]))
+
     return model, float(mv.tags["decision_threshold"]), mv.version
 
+
 def save_predictions(df_out):
-    """Escribe la tabla de predicciones en la base de salida."""
+    """Write the predictions table to the output database."""
     with sqlite3.connect(OUTPUT_DB) as conn:
         df_out.to_sql(OUTPUT_TABLE, conn, if_exists="replace", index=False)
         conn.commit()
 
 
-# ============================================================
-# STREAMLIT
-# ============================================================
+############## HEADER
 
-st.image(IMAGE_PATH, use_container_width=True)
-st.title("TrueML Challenge: Debt Prediction")
-st.write("Demo of an app for the TrueML Challenge")
+st.image(IMAGE_PATH, width=220)
 
-# ------------------------------------------------------------
-# Datos y modelo
-# ------------------------------------------------------------
+st.title("TrueML Collections - Debt Prediction")
+st.write("Prediction demo built with SQLite + MLflow + Streamlit.")
+
+
+############## DATA AND MODEL
 
 df_raw = load_data()
 
@@ -125,18 +130,14 @@ st.subheader("Database")
 st.dataframe(df_raw[display_cols], use_container_width=True, hide_index=True)
 
 
-# ------------------------------------------------------------
-# Predicción de todo el dataset
-# ------------------------------------------------------------
+############## BATCH PREDICTION
 
 st.subheader("Batch prediction")
 
 proba = model.predict_proba(df)[:, 1]
 pred = np.where(proba >= threshold, model.classes_[1], model.classes_[0])
 
-df_out = df_raw[variables].copy()
-if "account_id" in df_raw.columns:
-    df_out.insert(0, "account_id", df_raw["account_id"])
+df_out = df_raw[display_cols].copy()
 df_out["probability"] = proba
 df_out["prediction"] = pred
 df_out["model_version"] = version
@@ -178,23 +179,23 @@ with col_b:
                 f"{len(df_out):,} rows written to "
                 f"`{Path(OUTPUT_DB).name}` / `{OUTPUT_TABLE}`."
             )
-        except Exception as e:
-            st.error(f"Could not write to the database: {e}")
-            st.exception(e)
+        except Exception:
+            st.warning(
+                "Writing to the database is only available when running locally. "
+                "Use the CSV download instead."
+            )
 
 
-# ------------------------------------------------------------
-# Predicción individual
-# ------------------------------------------------------------
+############## SINGLE PREDICTION
+
 st.subheader("Single prediction")
 
 account_id = st.selectbox(
     "Select account_id",
     df_raw["account_id"].tolist(),
-    help="Cuenta a evaluar con el modelo champion.",
+    help="Account to score with the champion model.",
 )
 
-# Posición de esa cuenta dentro del array de probabilidades
 pos = int(np.flatnonzero(df_raw["account_id"].values == account_id)[0])
 
 st.write("Selected record:")
