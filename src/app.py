@@ -118,7 +118,6 @@ try:
     model, threshold, version = load_model()
     st.success(
         f"Champion model v{version} loaded successfully. "
-        f"Decision threshold: {threshold:.3f}"
     )
 except Exception as e:
     st.error(f"Could not load the champion model: {e}")
