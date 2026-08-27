@@ -35,5 +35,4 @@ outputs/
 *.log
 venv/
 mlruns/
-*.pkl
 __pycache__/
