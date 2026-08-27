@@ -76,11 +76,14 @@ def load_model():
     client = MlflowClient()
     mv = client.get_model_version_by_alias(MODEL_NAME, ALIAS)
 
-    # Localiza el modelo dentro de los artifacts del repo, sin depender
-    # de las rutas absolutas que guardó el registro en Windows
-    model_dir = next((BASE.parent / "mlartifacts").rglob("MLmodel")).parent
-    model = mlflow.sklearn.load_model(str(model_dir))
+    model_id = mv.source.rsplit("/", 1)[-1]          # m-564f2616...
+    matches = [p.parent for p in BASE.parent.rglob("MLmodel") if model_id in str(p)]
+    if not matches:
+        raise FileNotFoundError(
+            f"No se encontraron artifacts para {model_id} bajo {BASE.parent}."
+        )
 
+    model = mlflow.sklearn.load_model(str(matches[0]))
     return model, float(mv.tags["decision_threshold"]), mv.version
 
 def save_predictions(df_out):
