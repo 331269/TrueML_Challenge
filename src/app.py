@@ -102,10 +102,9 @@ def save_predictions(df_out):
 
 ############## HEADER
 
-st.image(IMAGE_PATH, width=220)
-
-st.title("TrueML Collections - Debt Prediction")
-st.write("Prediction demo built with SQLite + MLflow + Streamlit.")
+st.image(IMAGE_PATH, use_container_width=True)
+st.title("TrueML Challenge: Debt Prediction")
+st.write("Demo of an app for the TrueML Challenge")
 
 
 ############## DATA AND MODEL
