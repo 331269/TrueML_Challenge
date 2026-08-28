@@ -182,3 +182,4 @@ with col_b:
                 "Writing to the database is only available when running locally. "
                 "Use the CSV download instead."
             )
+
